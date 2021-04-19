@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/umijs/snbMockMiddleware.git"
+    "url": "git+https://github.com/cherislive/snb-mock-middleware.git"
   },
   "keywords": [
     "umi",
@@ -19,9 +19,9 @@
   "author": "cheris",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/umijs/snbMockMiddleware/issues"
+    "url": "https://cherislive/snb-mock-middleware/issues"
   },
-  "homepage": "https://github.com/umijs/snbMockMiddleware#readme",
+  "homepage": "https://cherislive/snb-mock-middleware#readme",
   "dependencies": {
     "assert": "^1.4.1",
     "chokidar": "^2.0.4",
