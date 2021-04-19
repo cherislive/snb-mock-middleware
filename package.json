@@ -1,0 +1,45 @@
+{
+  "name": "snb-mock-middleware",
+  "version": "0.0.5",
+  "description": "An express middleware that reads the umi mock",
+  "main": "index.js",
+  "scripts": {
+    "test": "node testMock.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umijs/snbMockMiddleware.git"
+  },
+  "keywords": [
+    "umi",
+    "mock",
+    "express",
+    "middleware"
+  ],
+  "author": "cheris",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/umijs/snbMockMiddleware/issues"
+  },
+  "homepage": "https://github.com/umijs/snbMockMiddleware#readme",
+  "dependencies": {
+    "assert": "^1.4.1",
+    "chokidar": "^2.0.4",
+    "glob": "^7.1.2",
+    "mockjs": "^1.0.1-beta3",
+    "moment": "^2.22.2",
+    "path-to-regexp": "^2.2.1",
+    "body-parser": "^1.18.3",
+    "url": "^0.11.0",
+    "@babel/core": "7.0.0-beta.46",
+    "@babel/plugin-transform-modules-commonjs": "7.0.0-beta.46",
+    "@babel/register": "7.0.0-beta.46",
+    "@babel/runtime": "7.0.0-beta.46",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-dynamic-import-node-sync": "^2.0.1",
+    "babel-preset-umi": "^0.3.0"
+  },
+  "devDependencies": {
+    "express": "^4.16.3"
+  }
+}
