@@ -1,9 +1,10 @@
 {
   "name": "snb-mock-middleware",
-  "version": "0.0.5",
+  "version": "1.2.4",
   "description": "An express middleware that reads the umi mock",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "babel src -d dist",
     "test": "node testMock.js"
   },
   "repository": {
@@ -23,21 +24,30 @@
   },
   "homepage": "https://cherislive/snb-mock-middleware#readme",
   "dependencies": {
+    "@babel/cli": "^7.13.14",
+    "@babel/core": "^7.13.15",
+    "@babel/plugin-transform-modules-commonjs": "^7.13.8",
+    "@babel/preset-env": "^7.13.15",
+    "@babel/register": "^7.13.14",
+    "@babel/runtime": "^7.13.10",
     "assert": "^1.4.1",
+    "babel-eslint": "^10.1.0",
+    "babel-plugin-add-module-exports": "^1.0.4",
+    "babel-plugin-dynamic-import-node-sync": "^2.0.1",
+    "babel-preset-umi": "^1.8.4",
+    "body-parser": "^1.18.3",
     "chokidar": "^2.0.4",
+    "crequire": "^1.8.1",
+    "fs": "^0.0.1-security",
     "glob": "^7.1.2",
+    "lodash": "^4.17.21",
     "mockjs": "^1.0.1-beta3",
     "moment": "^2.22.2",
+    "multer": "^1.4.2",
     "path-to-regexp": "^2.2.1",
-    "body-parser": "^1.18.3",
-    "url": "^0.11.0",
-    "@babel/core": "7.0.0-beta.46",
-    "@babel/plugin-transform-modules-commonjs": "7.0.0-beta.46",
-    "@babel/register": "7.0.0-beta.46",
-    "@babel/runtime": "7.0.0-beta.46",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-plugin-dynamic-import-node-sync": "^2.0.1",
-    "babel-preset-umi": "^0.3.0"
+    "resolve": "^1.20.0",
+    "signale": "^1.4.0",
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "express": "^4.16.3"

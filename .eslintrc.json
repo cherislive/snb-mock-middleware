@@ -1,0 +1,15 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["airbnb-base", "prettier", "plugin:prettier/recommended"],
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "rules": {
+    "func-names": "off",
+    "no-else-return": "off",
+    "no-param-reassign": "off",
+    "no-restricted-syntax": "off",
+    "no-use-before-define": "off"
+  }
+}

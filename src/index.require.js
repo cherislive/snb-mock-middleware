@@ -1,17 +1,17 @@
-// import { existsSync } from 'fs';
-import resolve from 'resolve';
-import crequire from 'crequire';
-import lodash from 'lodash';
-import { join, dirname } from 'path';
-import bodyParser from 'body-parser';
-import glob from 'glob';
-import assert from 'assert';
-import chokidar from 'chokidar';
-import pathToRegexp from 'path-to-regexp';
-// import register from '@babel/register';
-import multer from 'multer';
-import signale from 'signale';
-import { existsSync, readFileSync } from 'fs';
+// const { existsSync } = require('fs');
+const resolve = require('resolve');
+const crequire = require('crequire');
+const lodash = require('lodash');
+const { join, dirname } = require('path');
+const bodyParser = require('body-parser');
+const glob = require('glob');
+const assert = require('assert');
+const chokidar = require('chokidar');
+const pathToRegexp = require('path-to-regexp');
+// const register = require('@babel/register');
+const multer = require('multer');
+const signale = require('signale');
+const { existsSync, readFileSync } = require('fs');
 
 // const { parseRequireDeps } = require('./utils');
 
@@ -134,6 +134,20 @@ function getMockMiddleware(path, options = {}) {
 
     debug(`load mock data including files ${JSON.stringify(mockFiles)}`);
 
+    // register babel
+    // support
+    // clear require cache and set babel register
+    const requireDeps = mockFiles.reduce((memo, file) => {
+      memo = memo.concat(parseRequireDeps(file));
+      return memo;
+    }, []);
+    requireDeps.forEach((f) => {
+      if (require.cache[f]) {
+        delete require.cache[f];
+      }
+    });
+
+    // return normalizeConfig(requireDeps);
     // get mock data
     const mockData = normalizeConfig(getMockConfig(mockFiles));
     return mockData;
@@ -280,4 +294,4 @@ function getMockMiddleware(path, options = {}) {
     }
   };
 }
-export default getMockMiddleware;
+module.exports = getMockMiddleware;
