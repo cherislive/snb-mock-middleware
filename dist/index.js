@@ -1,39 +1,14 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-var _resolve = _interopRequireDefault(require("resolve"));
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-var _crequire = _interopRequireDefault(require("crequire"));
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var _lodash = _interopRequireDefault(require("lodash"));
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
-var _path = require("path");
-
-var _bodyParser = _interopRequireDefault(require("body-parser"));
-
-var _glob = _interopRequireDefault(require("glob"));
-
-var _assert = _interopRequireDefault(require("assert"));
-
-var _chokidar = _interopRequireDefault(require("chokidar"));
-
-var _pathToRegexp = _interopRequireDefault(require("path-to-regexp"));
-
-var _multer = _interopRequireDefault(require("multer"));
-
-var _signale = _interopRequireDefault(require("signale"));
-
-var _fs = require("fs");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
@@ -47,302 +22,253 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+var _require = require('path'),
+    join = _require.join;
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+var chokidar = require('chokidar');
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var signale = require('signale');
 
-// const { parseRequireDeps } = require('./utils');
-var debug = console.log;
-var VALID_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
-var BODY_PARSED_METHODS = ['post', 'put', 'patch'];
-var errors = [];
-
-function winPath(path) {
-  var isExtendedLengthPath = /^\\\\\?\\/.test(path);
-
-  if (isExtendedLengthPath) {
-    return path;
-  }
-
-  return path.replace(/\\/g, '/');
-}
-
-function getMockConfig(files) {
-  return files.reduce(function (memo, mockFile) {
-    try {
-      var m = require(mockFile); // eslint-disable-line
+var lodash = require('lodash'); // const register = require('@babel/register');
 
 
-      memo = _objectSpread(_objectSpread({}, memo), m["default"] || m);
-      return memo;
-    } catch (e) {
-      throw new Error(e.stack);
-    }
-  }, {});
-}
+var _require2 = require('./utils'),
+    getMockData = _require2.getMockData,
+    cleanRequireCache = _require2.cleanRequireCache,
+    getConflictPaths = _require2.getConflictPaths,
+    parseRequireDeps = _require2.parseRequireDeps,
+    matchMock = _require2.matchMock;
 
-function parse(filePath) {
-  var content = (0, _fs.readFileSync)(filePath, 'utf-8');
-  return ((0, _crequire["default"])(content) || []).map(function (o) {
-    return o.path;
-  }).filter(function (path) {
-    return path.charAt(0) === '.';
-  }).map(function (path) {
-    return winPath(_resolve["default"].sync(path, {
-      basedir: (0, _path.dirname)(filePath),
-      extensions: ['.tsx', '.ts', '.jsx', '.js']
-    }));
+var debug = console;
+
+function createMiddleware(opts) {
+  var cwd = opts.cwd,
+      mockData = opts.mockData,
+      mockWatcherPaths = opts.mockWatcherPaths,
+      updateMockData = opts.updateMockData;
+  var data = mockData; // watcher
+
+  var errors = [];
+  var absMockPath = join(cwd, 'mock'); // const srcMockPath = join(cwd, 'src');
+
+  var absConfigPath = join(cwd, '.umirc.mock.js');
+  var watcher = chokidar.watch([absConfigPath, absMockPath].concat(_toConsumableArray(mockWatcherPaths)), {
+    ignoreInitial: true
   });
-}
+  watcher.on('ready', function () {
+    return debug.log('Initial scan complete. Ready for changes');
+  }).on('all', // debounce avoiding too much file change events
+  lodash.debounce( /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(event, file) {
+      var _yield$updateMockData;
 
-function parseRequireDeps(filePath) {
-  var paths = [filePath];
-  var ret = [winPath(filePath)];
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              debug.log("[".concat(event, "] ").concat(file, ", reload mock data"));
+              cleanRequireCache(mockWatcherPaths); // refresh data
 
-  while (paths.length) {
-    // 避免依赖循环
-    var nextPaths = paths.shift();
-    var extraPaths = nextPaths.length ? _lodash["default"].pullAll(parse(nextPaths), ret) : [];
+              _context.next = 4;
+              return updateMockData();
 
-    if (extraPaths.length) {
-      paths.push.apply(paths, _toConsumableArray(extraPaths));
-      ret.push.apply(ret, _toConsumableArray(extraPaths));
-    }
-  }
+            case 4:
+              _context.t1 = _yield$updateMockData = _context.sent;
+              _context.t0 = _context.t1 === null;
 
-  return ret;
-}
-
-function getMockMiddleware(path) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var absMockPath = (0, _path.join)(path, 'mock');
-  var absConfigPath = (0, _path.join)(path, '.umirc.mock.js');
-  var ignore = []; // ?** S
-  // register({
-  //   presets: ['umi'],
-  //   plugins: [
-  //     require.resolve('babel-plugin-add-module-exports'),
-  //     require.resolve('@babel/plugin-transform-modules-commonjs'),
-  //   ],
-  //   babelrc: false,
-  //   only: [absMockPath],
-  // });
-  // ?** E
-
-  var mockData = getConfig();
-  watch();
-
-  function watch() {
-    if (process.env.WATCH_FILES === 'none') return;
-
-    var watcher = _chokidar["default"].watch([absConfigPath, absMockPath], {
-      ignoreInitial: true
-    });
-
-    watcher.on('all', function (event, file) {
-      debug("[".concat(event, "] ").concat(file, ", reload mock data"));
-      mockData = getConfig();
-
-      if (!errors.length) {
-        _signale["default"].success("Mock file parse success");
-      }
-    });
-  }
-
-  function getConfig() {
-    // Clear errors
-    errors.splice(0, errors.length);
-    cleanRequireCache();
-    var cwd = (0, _path.join)(path, ''); // mock
-
-    var mockFiles = [].concat(_toConsumableArray(_glob["default"].sync('mock/**/*.[jt]s', {
-      cwd: cwd,
-      ignore: ignore
-    }) || []), _toConsumableArray(_glob["default"].sync('**/_mock.[jt]s', {
-      cwd: cwd,
-      ignore: ignore
-    }) || [])).map(function (path) {
-      return (0, _path.join)(cwd, path);
-    }).filter(function (path) {
-      return path && (0, _fs.existsSync)(path);
-    }).map(function (path) {
-      return winPath(path);
-    });
-    debug("load mock data including files ".concat(JSON.stringify(mockFiles))); // get mock data
-
-    var mockData = normalizeConfig(getMockConfig(mockFiles));
-    return mockData; // const mockWatcherPaths = [...(mockFiles || []), join(cwd, 'mock')]
-    // .filter((path) => path && existsSync(path))
-    // .map((path) => winPath(path));
-    // {
-    //   mockData,
-    //   mockPaths: mockFiles,
-    //   mockWatcherPaths,
-    // }
-  }
-
-  function parseKey(key) {
-    var method = 'get';
-    var path = key;
-
-    if (key.indexOf(' ') > -1) {
-      var splited = key.split(' ');
-      method = splited[0].toLowerCase();
-      path = splited[1]; // eslint-disable-line
-    }
-
-    (0, _assert["default"])(VALID_METHODS.includes(method), "Invalid method ".concat(method, " for path ").concat(path, ", please check your mock files."));
-    return {
-      method: method,
-      path: path
-    };
-  }
-
-  function createHandler(method, path, handler) {
-    return function (req, res, next) {
-      if (BODY_PARSED_METHODS.includes(method)) {
-        _bodyParser["default"].json({
-          limit: '5mb',
-          strict: false
-        })(req, res, function () {
-          _bodyParser["default"].urlencoded({
-            limit: '5mb',
-            extended: true
-          })(req, res, function () {
-            sendData();
-          });
-        });
-      } else {
-        sendData();
-      }
-
-      function sendData() {
-        if (typeof handler === 'function') {
-          (0, _multer["default"])().any()(req, res, function () {
-            handler(req, res, next);
-          });
-        } else {
-          res.json(handler);
-        }
-      }
-    };
-  }
-
-  function normalizeConfig(config) {
-    return Object.keys(config).reduce(function (memo, key) {
-      var handler = config[key];
-
-      var type = _typeof(handler);
-
-      (0, _assert["default"])(type === 'function' || type === 'object', "mock value of ".concat(key, " should be function or object, but got ").concat(type));
-
-      var _parseKey = parseKey(key),
-          method = _parseKey.method,
-          path = _parseKey.path;
-
-      var keys = [];
-      var pathOptions = {
-        whitelist: ['%'] // treat %3A as regular chars
-
-      };
-      var re = (0, _pathToRegexp["default"])(path, keys, pathOptions);
-      memo.push({
-        method: method,
-        path: path,
-        re: re,
-        keys: keys,
-        handler: createHandler(method, path, handler)
-      });
-      return memo;
-    }, []);
-  }
-
-  function cleanRequireCache() {
-    Object.keys(require.cache).forEach(function (file) {
-      if (file === absConfigPath || file.indexOf(absMockPath) > -1) {
-        delete require.cache[file];
-      }
-    });
-  }
-
-  function matchMock(req) {
-    var exceptPath = req.path;
-    var exceptMethod = req.method.toLowerCase();
-
-    var _iterator = _createForOfIteratorHelper(mockData),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var mock = _step.value;
-        var method = mock.method,
-            re = mock.re,
-            keys = mock.keys;
-
-        if (method === exceptMethod) {
-          var match = re.exec(req.path);
-
-          if (match) {
-            var params = {};
-
-            for (var i = 1; i < match.length; i = i + 1) {
-              var key = keys[i - 1];
-              var prop = key.name;
-              var val = decodeParam(match[i]);
-
-              if (val !== undefined || !hasOwnProperty.call(params, prop)) {
-                params[prop] = val;
+              if (_context.t0) {
+                _context.next = 8;
+                break;
               }
-            }
 
-            req.params = params;
-            return mock;
+              _context.t0 = _yield$updateMockData === void 0;
+
+            case 8:
+              if (!_context.t0) {
+                _context.next = 12;
+                break;
+              }
+
+              _context.t2 = void 0;
+              _context.next = 13;
+              break;
+
+            case 12:
+              _context.t2 = _yield$updateMockData.mockData;
+
+            case 13:
+              data = _context.t2;
+
+              if (!errors.length) {
+                signale.success("Mock file parse success");
+              }
+
+            case 15:
+            case "end":
+              return _context.stop();
           }
         }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
+      }, _callee);
+    }));
 
-    function decodeParam(val) {
-      if (typeof val !== 'string' || val.length === 0) {
-        return val;
-      }
+    return function (_x, _x2) {
+      return _ref.apply(this, arguments);
+    };
+  }(), 300)); // close
 
-      try {
-        return decodeURIComponent(val);
-      } catch (err) {
-        if (err instanceof URIError) {
-          err.message = "Failed to decode param ' ".concat(val, " '");
-          err.status = err.statusCode = 400;
+  process.once('SIGINT', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.next = 2;
+            return watcher.close();
+
+          case 2:
+          case "end":
+            return _context2.stop();
         }
-
-        throw err;
       }
-    }
+    }, _callee2);
+  })));
+  return {
+    middleware: function middleware(req, res, next) {
+      var match = data && matchMock(req, data);
 
-    return mockData.filter(function (_ref) {
-      var method = _ref.method,
-          re = _ref.re;
-      return method === exceptMethod && re.test(exceptPath);
-    })[0];
-  }
-
-  return function (req, res, next) {
-    var match = matchMock(req);
-
-    if (match) {
-      debug("mock matched: [".concat(match.method, "] ").concat(match.path));
-      return match.handler(req, res, next);
-    } else {
-      return next();
-    }
+      if (match) {
+        debug.log("mock matched: [".concat(match.method, "] ").concat(match.path));
+        return match.handler(req, res, next);
+      } else {
+        return next();
+      }
+    },
+    watcher: watcher
   };
 }
 
-var _default = getMockMiddleware;
-exports["default"] = _default;
+function mock(api) {
+  var cwd = api.cwd,
+      config = api.config; // cwd = path
+  // u-n
+  // api.describe({
+  //   key: 'mock',
+  //   config: {
+  //     schema(joi) {
+  //       return joi.object().keys({
+  //         exclude: joi
+  //           .array()
+  //           .items(joi.string())
+  //           .description('exclude files not parse mock'),
+  //       });
+  //     },
+  //   },
+  // });
+
+  if (process.env.MOCK === 'none') return;
+
+  var registerBabel = function registerBabel(paths) {
+    // support
+    // clear require cache and set babel register
+    var requireDeps = paths.reduce(function (memo, file) {
+      memo = memo.concat(parseRequireDeps(file));
+      return memo;
+    }, []);
+    requireDeps.forEach(function (f) {
+      if (require.cache[f]) {
+        delete require.cache[f];
+      }
+    }); // u-n
+    // api.babelRegister.setOnlyMap({
+    //   key: 'mock',
+    //   value: [...paths, ...requireDeps],
+    // });
+  };
+
+  var ignore = [// ignore mock files under node_modules
+  'node_modules/**'].concat(_toConsumableArray((config === null || config === void 0 ? void 0 : config.exclude) || [])); // u-n
+  // api.addBeforeMiddlewares(async () => {})
+
+  var checkConflictPaths = /*#__PURE__*/function () {
+    var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(mockRes) {
+      var conflictPaths;
+      return regeneratorRuntime.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              // const routes = await api.getRoutes();  // u-n
+              conflictPaths = getConflictPaths({
+                // routes,   // u-n
+                mockData: mockRes.mockData
+              });
+
+              if ((conflictPaths === null || conflictPaths === void 0 ? void 0 : conflictPaths.length) > 0) {
+                // [WARN] for conflict path with routes config
+                debug.warn('mock paths', conflictPaths.map(function (conflictPath) {
+                  return conflictPath.path;
+                }), 'conflicts with route config.');
+              }
+
+            case 2:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3);
+    }));
+
+    return function checkConflictPaths(_x3) {
+      return _ref3.apply(this, arguments);
+    };
+  }();
+
+  var mockResult = getMockData({
+    cwd: cwd,
+    ignore: ignore,
+    registerBabel: registerBabel
+  }); // check whether conflict when starting
+
+  checkConflictPaths(mockResult);
+
+  var _createMiddleware = createMiddleware(_objectSpread(_objectSpread({
+    cwd: cwd
+  }, mockResult), {}, {
+    updateMockData: function () {
+      var _updateMockData = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+        var result;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                result = getMockData({
+                  cwd: cwd,
+                  ignore: ignore,
+                  registerBabel: registerBabel
+                }); // check whether conflict when updating
+
+                _context4.next = 3;
+                return checkConflictPaths(result);
+
+              case 3:
+                return _context4.abrupt("return", result);
+
+              case 4:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }));
+
+      function updateMockData() {
+        return _updateMockData.apply(this, arguments);
+      }
+
+      return updateMockData;
+    }()
+  })),
+      middleware = _createMiddleware.middleware;
+
+  return middleware;
+}
+
+module.exports = mock;
