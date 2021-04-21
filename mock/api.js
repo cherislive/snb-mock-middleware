@@ -1,4 +1,4 @@
-import mockjs from 'mockjs';
+const mockjs = require('mockjs');
 
 const titles = [
   'Alipay',
@@ -334,8 +334,8 @@ function getFakeCaptcha(req, res) {
   }
 }
 
-export default {
-  'GET /api/project/notice': getNotice,
+exports.default = {
+  'GET /api/projectnoticepp': getNotice,
   'GET /api/activities': getActivities,
   'POST /api/forms': (req, res) => {
     res.send({ message: 'Ok' });

@@ -5,12 +5,18 @@ use:
 ```
 const express = require('express');
 const path = require('path');
-const getMockMiddleware = require('./index');
+const createtMockMiddleware = require('./dist/index');
 var app = express();
+app.use(
+  createtMockMiddleware({
+    cwd: path.join(__dirname, '/'),
+  }),
+);
 
-//Looking for the mock below the path
-app.use(getMockMiddleware(path.join(__dirname, '/')));
+const server = app.listen(3018, () => {
+  const host = server.address().address;
+  const port = server.address().port;
+  console.log('Example app listening at http://%s:%s', host, port);
+});
 
-app.listen(3000);
-console.log('look in http://localhost:3000/');
 ```

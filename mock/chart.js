@@ -1,4 +1,4 @@
-import moment from 'moment';
+const moment = require('moment');
 
 // mock data
 const visitData = [];
@@ -192,6 +192,6 @@ const getFakeChartData = {
   radarData,
 };
 
-export default {
+exports.default = {
   'GET /api/fake_chart_data': getFakeChartData,
 };

@@ -1,10 +1,15 @@
-import express from 'express';
-import path from 'path';
-import getMockMiddleware from './src/index.js';
-
-const __dirname = path.resolve(path.dirname(''));
+const express = require('express');
+const path = require('path');
+const createtMockMiddleware = require('./src/index');
 var app = express();
-app.use(getMockMiddleware(path.join(__dirname, '/')));
+app.use(
+  createtMockMiddleware({
+    cwd: path.join(__dirname, '/'),
+  }),
+);
 
-app.listen(3003);
-console.log('look in http://localhost:3000/');
+const server = app.listen(3018, () => {
+  const host = server.address().address;
+  const port = server.address().port;
+  console.log('Example app listening at http://%s:%s', host, port);
+});

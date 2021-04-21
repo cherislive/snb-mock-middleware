@@ -1,8 +1,8 @@
 {
   "name": "snb-mock-middleware",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "An express middleware that reads the umi mock",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "scripts": {
     "build": "babel src -d dist",
     "test": "node testMock.js"

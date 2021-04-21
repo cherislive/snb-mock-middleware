@@ -1,283 +1,154 @@
-// import { existsSync } from 'fs';
-import resolve from 'resolve';
-import crequire from 'crequire';
-import lodash from 'lodash';
-import { join, dirname } from 'path';
-import bodyParser from 'body-parser';
-import glob from 'glob';
-import assert from 'assert';
-import chokidar from 'chokidar';
-import pathToRegexp from 'path-to-regexp';
-// import register from '@babel/register';
-import multer from 'multer';
-import signale from 'signale';
-import { existsSync, readFileSync } from 'fs';
+const { join } = require('path');
+const chokidar = require('chokidar');
+const signale = require('signale');
+const lodash = require('lodash');
+// const register = require('@babel/register');
 
-// const { parseRequireDeps } = require('./utils');
+const {
+  getMockData,
+  cleanRequireCache,
+  getConflictPaths,
+  parseRequireDeps,
+  matchMock,
+} = require('./utils');
 
-const debug = console.log;
+const debug = console;
 
-const VALID_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
-const BODY_PARSED_METHODS = ['post', 'put', 'patch'];
-const errors = [];
+function createMiddleware(opts) {
+  const { cwd, mockData, mockWatcherPaths, updateMockData } = opts;
+  let data = mockData;
 
-function winPath(path) {
-  const isExtendedLengthPath = /^\\\\\?\\/.test(path);
-  if (isExtendedLengthPath) {
-    return path;
-  }
-  return path.replace(/\\/g, '/');
-}
+  // watcher
+  const errors = [];
 
-function getMockConfig(files) {
-  return files.reduce((memo, mockFile) => {
-    try {
-      const m = require(mockFile); // eslint-disable-line
-      memo = {
-        ...memo,
-        ...(m.default || m),
-      };
-      return memo;
-    } catch (e) {
-      throw new Error(e.stack);
-    }
-  }, {});
-}
+  const absMockPath = join(cwd, 'mock');
+  // const srcMockPath = join(cwd, 'src');
+  const absConfigPath = join(cwd, '.umirc.mock.js');
 
-function parse(filePath) {
-  const content = readFileSync(filePath, 'utf-8');
-  return (
-    (crequire(content) || []).map((o) => o.path)
-      .filter((path) => path.charAt(0) === '.')
-      .map((path) =>
-        winPath(
-          resolve.sync(path, {
-            basedir: dirname(filePath),
-            extensions: ['.tsx', '.ts', '.jsx', '.js'],
-          }),
-        ),
-      )
-  );
-}
-
-function parseRequireDeps (filePath) {
-  const paths = [filePath];
-  const ret = [winPath(filePath)];
-
-  while (paths.length) {
-    // 避免依赖循环
-    const nextPaths = paths.shift();
-    const extraPaths = nextPaths.length ? lodash.pullAll(parse(nextPaths), ret) : [];
-    if (extraPaths.length) {
-      paths.push(...extraPaths);
-      ret.push(...extraPaths);
-    }
-  }
-
-  return ret;
-}
-
-function getMockMiddleware(path, options = {}) {
-  const absMockPath = join(path, 'mock');
-  const absConfigPath = join(path, '.umirc.mock.js');
-
-  const ignore = [];
-
-  // ?** S
-  // register({
-  //   presets: ['umi'],
-  //   plugins: [
-  //     require.resolve('babel-plugin-add-module-exports'),
-  //     require.resolve('@babel/plugin-transform-modules-commonjs'),
-  //   ],
-  //   babelrc: false,
-  //   only: [absMockPath],
-  // });
-  // ?** E
-
-  let mockData = getConfig();
-  watch();
-
-  function watch() {
-    if (process.env.WATCH_FILES === 'none') return;
-    const watcher = chokidar.watch([absConfigPath, absMockPath], {
-      ignoreInitial: true,
-    });
-    watcher.on('all', (event, file) => {
-      debug(`[${event}] ${file}, reload mock data`);
-      mockData = getConfig();
-      if (!errors.length) {
-        signale.success(`Mock file parse success`);
-      }
-    });
-  }
-
-  function getConfig() {
-    // Clear errors
-    errors.splice(0, errors.length);
-    cleanRequireCache();
-    const cwd = join(path, ''); // mock
-
-    const mockFiles = [
-      ...(glob.sync('mock/**/*.[jt]s', {
-        cwd,
-        ignore,
-      }) || []),
-      ...(glob.sync('**/_mock.[jt]s', {
-        cwd,
-        ignore,
-      }) || []),
-    ]
-      .map((path) => join(cwd, path))
-      .filter((path) => path && existsSync(path))
-      .map((path) => winPath(path));
-
-    debug(`load mock data including files ${JSON.stringify(mockFiles)}`);
-
-    // get mock data
-    const mockData = normalizeConfig(getMockConfig(mockFiles));
-    return mockData;
-    // const mockWatcherPaths = [...(mockFiles || []), join(cwd, 'mock')]
-    // .filter((path) => path && existsSync(path))
-    // .map((path) => winPath(path));
-    // {
-    //   mockData,
-    //   mockPaths: mockFiles,
-    //   mockWatcherPaths,
-    // }
-  }
-
-  function parseKey(key) {
-    let method = 'get';
-    let path = key;
-    if (key.indexOf(' ') > -1) {
-      const splited = key.split(' ');
-      method = splited[0].toLowerCase();
-      path = splited[1]; // eslint-disable-line
-    }
-    assert(
-      VALID_METHODS.includes(method),
-      `Invalid method ${method} for path ${path}, please check your mock files.`,
+  const watcher = chokidar.watch([absConfigPath, absMockPath, ...mockWatcherPaths], {
+    ignoreInitial: true,
+  });
+  watcher
+    .on('ready', () => debug.log('Initial scan complete. Ready for changes'))
+    .on(
+      'all',
+      // debounce avoiding too much file change events
+      lodash.debounce(async (event, file) => {
+        debug.log(`[${event}] ${file}, reload mock data`);
+        cleanRequireCache(mockWatcherPaths);
+        // refresh data
+        data = (await updateMockData())?.mockData;
+        if (!errors.length) {
+          signale.success(`Mock file parse success`);
+        }
+      }, 300),
     );
-    return {
-      method,
-      path,
-    };
-  }
+  // close
+  process.once('SIGINT', async () => {
+    await watcher.close();
+  });
 
-  function createHandler(method, path, handler) {
-    return function (req, res, next) {
-      if (BODY_PARSED_METHODS.includes(method)) {
-        bodyParser.json({ limit: '5mb', strict: false })(req, res, () => {
-          bodyParser.urlencoded({ limit: '5mb', extended: true })(req, res, () => {
-            sendData();
-          });
-        });
+  return {
+    middleware: (req, res, next) => {
+      const match = data && matchMock(req, data);
+      if (match) {
+        debug.log(`mock matched: [${match.method}] ${match.path}`);
+        return match.handler(req, res, next);
       } else {
-        sendData();
+        return next();
       }
-
-      function sendData() {
-        if (typeof handler === 'function') {
-          multer().any()(req, res, () => {
-            handler(req, res, next);
-          });
-        } else {
-          res.json(handler);
-        }
-      }
-    };
-  }
-
-  function normalizeConfig(config) {
-    return Object.keys(config).reduce((memo, key) => {
-      const handler = config[key];
-      const type = typeof handler;
-      assert(
-        type === 'function' || type === 'object',
-        `mock value of ${key} should be function or object, but got ${type}`,
-      );
-      const { method, path } = parseKey(key);
-      const keys = [];
-      const pathOptions = {
-        whitelist: ['%'], // treat %3A as regular chars
-      };
-      const re = pathToRegexp(path, keys, pathOptions);
-      memo.push({
-        method,
-        path,
-        re,
-        keys,
-        handler: createHandler(method, path, handler),
-      });
-      return memo;
-    }, []);
-  }
-
-  function cleanRequireCache() {
-    Object.keys(require.cache).forEach((file) => {
-      if (file === absConfigPath || file.indexOf(absMockPath) > -1) {
-        delete require.cache[file];
-      }
-    });
-  }
-
-  function matchMock(req) {
-    const { path: exceptPath } = req;
-    const exceptMethod = req.method.toLowerCase();
-    for (const mock of mockData) {
-      const { method, re, keys } = mock;
-      if (method === exceptMethod) {
-        const match = re.exec(req.path);
-        if (match) {
-          const params = {};
-
-          for (let i = 1; i < match.length; i = i + 1) {
-            const key = keys[i - 1];
-            const prop = key.name;
-            const val = decodeParam(match[i]);
-
-            if (val !== undefined || !hasOwnProperty.call(params, prop)) {
-              params[prop] = val;
-            }
-          }
-          req.params = params;
-          return mock;
-        }
-      }
-    }
-
-    function decodeParam(val) {
-      if (typeof val !== 'string' || val.length === 0) {
-        return val;
-      }
-
-      try {
-        return decodeURIComponent(val);
-      } catch (err) {
-        if (err instanceof URIError) {
-          err.message = `Failed to decode param ' ${val} '`;
-          err.status = err.statusCode = 400;
-        }
-
-        throw err;
-      }
-    }
-
-    return mockData.filter(({ method, re }) => {
-      return method === exceptMethod && re.test(exceptPath);
-    })[0];
-  }
-
-  return (req, res, next) => {
-    const match = matchMock(req);
-
-    if (match) {
-      debug(`mock matched: [${match.method}] ${match.path}`);
-      return match.handler(req, res, next);
-    } else {
-      return next();
-    }
+    },
+    watcher,
   };
 }
-export default getMockMiddleware;
+
+function mock(api) {
+  const { cwd, config } = api; // cwd = path
+
+  // u-n
+  // api.describe({
+  //   key: 'mock',
+  //   config: {
+  //     schema(joi) {
+  //       return joi.object().keys({
+  //         exclude: joi
+  //           .array()
+  //           .items(joi.string())
+  //           .description('exclude files not parse mock'),
+  //       });
+  //     },
+  //   },
+  // });
+
+  if (process.env.MOCK === 'none') return;
+
+  const registerBabel = (paths) => {
+    // support
+    // clear require cache and set babel register
+    const requireDeps = paths.reduce((memo, file) => {
+      memo = memo.concat(parseRequireDeps(file));
+      return memo;
+    }, []);
+    requireDeps.forEach((f) => {
+      if (require.cache[f]) {
+        delete require.cache[f];
+      }
+    });
+    // u-n
+    // api.babelRegister.setOnlyMap({
+    //   key: 'mock',
+    //   value: [...paths, ...requireDeps],
+    // });
+  };
+
+  const ignore = [
+    // ignore mock files under node_modules
+    'node_modules/**',
+    ...(config?.exclude || []),
+  ];
+
+  // u-n
+  // api.addBeforeMiddlewares(async () => {})
+
+  const checkConflictPaths = async (mockRes) => {
+    // const routes = await api.getRoutes();  // u-n
+    const conflictPaths = getConflictPaths({
+      // routes,   // u-n
+      mockData: mockRes.mockData,
+    });
+    if (conflictPaths?.length > 0) {
+      // [WARN] for conflict path with routes config
+      debug.warn(
+        'mock paths',
+        conflictPaths.map((conflictPath) => conflictPath.path),
+        'conflicts with route config.',
+      );
+    }
+  };
+
+  const mockResult = getMockData({
+    cwd,
+    ignore,
+    registerBabel,
+  });
+
+  // check whether conflict when starting
+  checkConflictPaths(mockResult);
+
+  const { middleware } = createMiddleware({
+    cwd,
+    ...mockResult,
+    updateMockData: async () => {
+      const result = getMockData({
+        cwd,
+        ignore,
+        registerBabel,
+      });
+      // check whether conflict when updating
+      await checkConflictPaths(result);
+      return result;
+    },
+  });
+  return middleware;
+}
+module.exports = mock;
