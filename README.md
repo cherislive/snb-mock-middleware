@@ -83,3 +83,6 @@ exports.default = {
 };
 
 ```
+
+## FAQ
+Move to: [issues](https://github.com/cherislive/snb-mock-middleware/issues)
