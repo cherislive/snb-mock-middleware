@@ -1,6 +1,6 @@
 {
   "name": "snb-mock-middleware",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "description": "ock middleware for mocking restful APIs.",
   "main": "src/index.js",
   "scripts": {
