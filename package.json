@@ -1,8 +1,8 @@
 {
   "name": "snb-mock-middleware",
-  "version": "1.2.6",
-  "description": "An express middleware that reads the umi mock",
-  "main": "dist/index.js",
+  "version": "1.2.9",
+  "description": "ock middleware for mocking restful APIs.",
+  "main": "src/index.js",
   "scripts": {
     "build": "babel src -d dist",
     "test": "node testMock.js"
@@ -12,7 +12,6 @@
     "url": "git+https://github.com/cherislive/snb-mock-middleware.git"
   },
   "keywords": [
-    "umi",
     "mock",
     "express",
     "middleware"
@@ -20,9 +19,9 @@
   "author": "cheris",
   "license": "ISC",
   "bugs": {
-    "url": "https://cherislive/snb-mock-middleware/issues"
+    "url": "https://github.com/cherislive/snb-mock-middleware/issues"
   },
-  "homepage": "https://cherislive/snb-mock-middleware#readme",
+  "homepage": "https://github.com/cherislive/snb-mock-middleware/wiki",
   "dependencies": {
     "@babel/cli": "^7.13.14",
     "@babel/core": "^7.13.15",
