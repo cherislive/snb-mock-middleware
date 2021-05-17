@@ -8,28 +8,10 @@ const multer = require('multer');
 const bodyParser = require('body-parser');
 const glob = require('glob');
 const assert = require('assert');
-const chalk = require('chalk');
 
 // const debug = console;
 const VALID_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
 const BODY_PARSED_METHODS = ['post', 'put', 'patch'];
-
-
-const log = {
-  info(msg) {
-    console.log(`${chalk.bgBlue.black(' INFO ')} ${chalk.blue(msg)}`);
-  },
-  success(msg) {
-    console.log(`${chalk.bgGreen.black(' DONE ')} ${chalk.green(msg)}`);
-  },
-  warn(msg) {
-    console.log(`${chalk.bgYellow.black(' WARN ')} ${chalk.yellow(msg)}`);
-  },
-  error(msg) {
-    console.log(`${chalk.bgRed.black(' ERROR ')} ${chalk.red(msg)}`);
-  }
-};
-
 
 // D
 const winPath = (path) => {
@@ -293,7 +275,6 @@ const getMockData = ({ cwd, ignore = [], registerBabel = () => {} }) => {
   };
 };
 
-module.exports.log = log;
 module.exports.parse = parse;
 module.exports.winPath = winPath;
 module.exports.getMockConfig = getMockConfig;

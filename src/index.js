@@ -5,7 +5,6 @@ const lodash = require('lodash');
 // const register = require('@babel/register');
 
 const {
-  log: debug,
   getMockData,
   cleanRequireCache,
   getConflictPaths,
@@ -13,7 +12,7 @@ const {
   matchMock,
 } = require('./utils');
 
-// const debug = console;
+const debug = console;
 
 function createMiddleware(opts) {
   const { cwd, mockData, mockWatcherPaths, updateMockData } = opts;
